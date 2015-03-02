@@ -1,4 +1,4 @@
 version: 0.0.{build}
 build_script:
  - nuget restore
- - msbuild /verbosity:detailed /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+ - msbuild /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
