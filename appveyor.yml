@@ -1,7 +1,8 @@
 version: 0.0.{build}
 
 install:
-  - ps: Start-FileDownload 'http://download.i2p2.no/releases/0.9.18/i2pinstall_0.9.18_windows.exe'
+  - ps: Start-FileDownload 'http://download.i2p2.no/releases/0.9.18/i2pinstall_0.9.18.jar'
+  - ps: java -jar i2pinstall_0.9.18.jar -console
 
 build_script:
  - nuget restore
