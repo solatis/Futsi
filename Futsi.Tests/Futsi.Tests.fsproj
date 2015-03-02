@@ -8,7 +8,7 @@
     <ProjectGuid>46530597-d342-4a31-8e50-5575d344aa9a</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Futsu.Tests</RootNamespace>
-    <AssemblyName>Futsu.Tests</AssemblyName>
+    <AssemblyName>Futsi.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFSharpCoreVersion>4.3.1.0</TargetFSharpCoreVersion>

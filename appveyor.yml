@@ -1,3 +1,4 @@
 version: 0.0.{build}
 build_script:
  - nuget restore
+ - msbuild fsharp\fsharp.sln /verbosity:diagnostic /p:Configuration=Debug /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
