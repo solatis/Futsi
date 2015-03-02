@@ -1,4 +1,4 @@
-﻿namespace Futsi
+﻿namespace Futsi.Protocol.Parser
 
 module Ast = 
     // A Token is a combination of a key and possibly an associated value
