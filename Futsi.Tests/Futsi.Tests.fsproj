@@ -61,8 +61,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <Compile Include="Protocol\Parser\Ast\Key.fs" />
-    <Compile Include="Protocol\Parser\Ast\Value.fs" />
+    <Compile Include="Ast.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
