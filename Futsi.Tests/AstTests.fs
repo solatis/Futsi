@@ -36,6 +36,5 @@ let tests =
 
             testCase "Should return None when key does not exist" <| fun _ ->
                 value "bar" [("foo", Some("wombat"))] |> should equal None
-
             ]
         ]
