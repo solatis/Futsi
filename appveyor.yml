@@ -1,10 +1,13 @@
 version: 0.0.{build}
 
 install:
-  - ps: Start-FileDownload 'http://download.i2p.io/purplei2p/i2pd/releases/0.8.0/setup_i2pd_v0.8.0.exe'
-  - setup_i2pd_v0.8.0.exe /SILENT /SP-
+  # - ps: Start-FileDownload 'http://download.i2p.io/purplei2p/i2pd/releases/0.8.0/setup_i2pd_v0.8.0.exe'
+  # - setup_i2pd_v0.8.0.exe /SILENT /SP-
   # - c:/"Program Files"/i2pd/i2pd.exe -service=install
-  - c:/"Program Files"/i2pd/i2pd.exe -daemon=1 -samport=7656
+
+  - ps: Start-FileDownload 'https://download.i2p2.de/releases/0.9.18/i2pinstall_0.9.18_windows.exe'
+  - i2pinstall_0.9.18_windows.exe
+ # - c:/"Program Files"/i2pd/i2pd.exe -daemon=1 -samport=7656
 
 build_script:
  - nuget restore
