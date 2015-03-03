@@ -61,7 +61,7 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <Compile Include="Ast.fs" />
+    <Compile Include="AstTests.fs" />
     <Compile Include="Main.fs" />
   </ItemGroup>
   <ItemGroup>
