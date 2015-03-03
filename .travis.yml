@@ -39,7 +39,7 @@ before_install:
  - nc -zvv localhost 2827; out=$?; while [[ $out -ne 0 ]]; do echo "Retry hit port 2827..."; nc -zvv localhost 2827; out=$?; sleep 1; done
 
 install:
- - nuget restore
+ - travis_retry nuget restore
 
 script:
  - xbuild
