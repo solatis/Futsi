@@ -32,7 +32,7 @@ before_install:
 ################
 # Install mono #
 ################
- - apt-get install mono-complete fsharp nuget
+ - sudo apt-get install mono-complete fsharp nuget
 
 # Wait until SAM and BOB bridges are open
  - nc -zvv localhost 7656; out=$?; while [[ $out -ne 0 ]]; do echo "Retry hit port 7656..."; nc -zvv localhost 7656; out=$?; sleep 1; done
