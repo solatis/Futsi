@@ -4,6 +4,7 @@ open Futsi.Ast
 open Fuchu
 open FsUnit
 
+[<Tests>]
 let tests =
     testList "Ast Tests" [
         testList "Looking up keys" [
