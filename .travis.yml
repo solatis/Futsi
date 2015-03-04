@@ -43,4 +43,4 @@ install:
 
 script:
  - xbuild
- - mono Futsi.Tests/bin/Debug/Futsi.Tests.exe
+#  - mono Futsi.Tests/bin/Debug/Futsi.Tests.exe
