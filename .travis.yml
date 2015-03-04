@@ -40,7 +40,8 @@ before_install:
 
 install:
  - travis_retry nuget restore
+ - travis_retry nuget install NUnit.Runners
 
 script:
  - xbuild
-#  - mono Futsi.Tests/bin/Debug/Futsi.Tests.exe
+ - mono NUnit.Runners.2.6.4/tools/nunit-console.exe Futsi.Tests/bin/Debug/Futsi.Tests.dll
