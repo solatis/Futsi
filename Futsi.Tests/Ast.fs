@@ -1,7 +1,6 @@
 ﻿module Futsi.Tests.Ast
 
 open Futsi.Ast
-open Fuchu
 open FsUnit
 open NUnit.Framework
 
