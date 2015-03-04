@@ -35,7 +35,7 @@ type Value() =
 
     [<Test>]
     member this.``Should return value when key/value exists``() =
-        test <@ value "foo" [("foo", Some("wombat"))] = (Some "wombat") @>
+        test <@ value "foo" [("foo", Some("wombat"))] = Some "wombat" @>
 
     [<Test>]
     member this.``Should return None when only key exists``() = 
