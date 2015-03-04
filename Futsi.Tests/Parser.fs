@@ -1,9 +1,9 @@
 ﻿module Futsi.Tests.Parser
 
 open Futsi.Parser
-open FsUnit
 open NUnit.Framework
 open FParsec.CharParsers
+open Swensen.Unquote
 
 let parseSuccess p i = 
     match run p i with
@@ -18,35 +18,35 @@ type QuotedValue() =
 
     [<Test>]
     member this.``Should return an empty string when the contents is empty``() =
-        parseSuccess quotedValue "\"\"" |> should equal ""
+        test <@ parseSuccess quotedValue "\"\"" = "" @>
 
     [<Test>]
     member this.``Should parse a normally quoted value``() = 
-        parseSuccess quotedValue "\"foo\"" |> should equal "foo"
+        test <@ parseSuccess quotedValue "\"foo\"" = "foo" @>
 
     [<Test>]
     member this.``Should parse a quoted value with spaces``() =
-        parseSuccess quotedValue "\"foo bar\"" |> should equal "foo bar"
+        test <@ parseSuccess quotedValue "\"foo bar\"" = "foo bar" @>
 
     [<Test>]
     member this.``Should parse a quoted value with an escaped quote``() = 
-        parseSuccess quotedValue "\"foo \\\" bar\"" |> should equal "foo \" bar"
+        test <@ parseSuccess quotedValue "\"foo \\\" bar\"" = "foo \" bar" @>
 
     [<Test>]
     member this.``Should parse a quoted value with an escaped newline``() = 
-        parseSuccess quotedValue "\"foo \\n bar\"" |> should equal "foo \n bar"
+        test <@ parseSuccess quotedValue "\"foo \\n bar\"" = "foo \n bar" @>
 
     [<Test>]
     member this.``Should parse a quoted value with an escaped carriage return``() =
-        parseSuccess quotedValue "\"foo \\r bar\"" |> should equal "foo \r bar"
+        test <@ parseSuccess quotedValue "\"foo \\r bar\"" = "foo \r bar" @>
 
     [<Test>]
     member this.``Should parse a quoted value with an escaped tab``() = 
-        parseSuccess quotedValue "\"foo \\t bar\"" |> should equal "foo \t bar"
+        test <@ parseSuccess quotedValue "\"foo \\t bar\"" = "foo \t bar" @>
 
     [<Test>]
     member this.``Should end after a quoted value has been reached``() = 
-        parseSuccess quotedValue "\"foo\" \"bar\"" |> should equal "foo"
+        test <@ parseSuccess quotedValue "\"foo\" \"bar\"" = "foo" @>
 
 
 [<TestFixture>]
@@ -54,29 +54,29 @@ type UnquotedValue() =
 
     [<Test>]
     member this.``Should return the correct value when a value is provided``() = 
-        parseSuccess unquotedValue "foo" |> should equal "foo"
+        test <@ parseSuccess unquotedValue "foo" = "foo" @>
 
     [<Test>]
     member this.``Should stop after whitespace``() = 
-        parseSuccess unquotedValue "foo bar" |> should equal "foo"  
-        parseSuccess unquotedValue "foo\tbar" |> should equal "foo"
+        test <@ parseSuccess unquotedValue "foo bar" = "foo"  @>
+        test <@ parseSuccess unquotedValue "foo\tbar" = "foo" @>
 
     [<Test>]
     member this.``Should stop after a newline``() = 
-        parseSuccess unquotedValue "foo\nbar" |> should equal "foo"
-        parseSuccess unquotedValue "foo\r\nbar" |> should equal "foo"
+        test <@ parseSuccess unquotedValue "foo\nbar" = "foo" @>
+        test <@ parseSuccess unquotedValue "foo\r\nbar" = "foo" @>
 
     [<Test>]
     member this.``Should parse a destination``() = 
-        parseSuccess unquotedValue testDestination |> should equal testDestination
+        test <@ parseSuccess unquotedValue testDestination = testDestination @>
 
     [<Test>]
     member this.``Should parse a destination and stop after the destination``() = 
-        parseSuccess unquotedValue (testDestination + " foobar") |> should equal testDestination
+        test <@ parseSuccess unquotedValue (testDestination + " foobar") = testDestination @>
 
 [<TestFixture>]
 type Key() = 
 
     [<Test>]
     member this.``Should succeed when providing a simple key``() = 
-        parseSuccess key "foo" |> should equal ("foo", Option<string>.None)
+        test <@ parseSuccess key "foo" = ("foo", None) @>
