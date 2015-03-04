@@ -8,7 +8,7 @@ open Swensen.Unquote
 let parseSuccess p i = 
     match run p i with
         | Success(result,_,_)   -> result
-        | Failure(errorMsg,_,_) -> failwith "Parse error occurred: %s" errorMsg
+        | Failure(errorMsg,_,_) -> failwith ("Parse error occurred: " + errorMsg)
 
 let parseFailure p i = 
     match run p i with
@@ -84,47 +84,66 @@ type Key() =
 
     [<Test>]
     member this.``Should succeed when providing a simple key``() = 
-        test <@ parseSuccess key "foo" = ("foo", None) @>
+        test <@ parseSuccess key "foo" = "foo" @>
 
     [<Test>]
     member this.``Should succeed when providing a space separated key``() = 
-        test <@ parseSuccess key "foo key" = ("foo", None) @>
+        test <@ parseSuccess key "foo key" = "foo" @>
 
     [<Test>]
     member this.``Should succeed when providing an equals separated key``() = 
-        test <@ parseSuccess key "foo=key" = ("foo", None) @>    
+        test <@ parseSuccess key "foo=key" = "foo" @>    
+
+    [<Test>]
+    member this.``Should stop after newline``() = 
+        test <@ parseSuccess key "foo\nbar" = "foo" @>    
+
 
     [<Test>]
     member this.``Should fail on empty input``() = 
         test <@ parseFailure key "" = true @>
 
 [<TestFixture>]
-type KeyValue() = 
+type Parameter() = 
 
     [<Test>]
-    member this.``Should succeed when providing a simple key/value``() = 
-        test <@ parseSuccess keyValue "foo=bar" = ("foo", Some "bar") @>
+    member this.``Should parse a key when only providing a key``() = 
+        test <@ parseSuccess parameter "foo" = ("foo", None) @>
 
     [<Test>]
-    member this.``Should succeed when providing a key/value where the value contains an equals sign``() = 
-        test <@ parseSuccess keyValue "foo=bar=wombat" = ("foo", Some "bar=wombat") @>
+    member this.``Should parse a key/value when only providing a key/value``() = 
+        test <@ parseSuccess parameter "foo=bar" = ("foo", Some "bar") @>
+
+[<TestFixture>]
+type Tokens() = 
 
     [<Test>]
-    member this.``Should succeed when providing a destination as a value``() = 
-        test <@ (parseSuccess keyValue ("destination=" + testDestination)) = ("destination", Some testDestination) @>
+    member this.``Should parse a single key token``() = 
+        test <@ parseSuccess tokens "foo" = [("foo", None)] @>
 
     [<Test>]
-    member this.``Should succeed when providing a quoted value``() = 
-        test <@ parseSuccess keyValue "foo=\"bar wombat\"" = ("foo", Some "bar wombat") @>
+    member this.``Should parse a single key/value token``() = 
+        test <@ parseSuccess tokens "foo=bar" = [("foo", Some "bar")] @>
 
     [<Test>]
-    member this.``Should fail on empty input``() = 
-        test <@ parseFailure keyValue "" = true @>
+    member this.``Should parse a multiple key tokens``() = 
+        test <@ parseSuccess tokens "foo wom" = [("foo", None); ("wom", None)] @>
 
     [<Test>]
-    member this.``Should fail on empty value``() = 
-        test <@ parseFailure keyValue "foo=" = true @>
+    member this.``Should parse a multiple key/value tokens``() = 
+        test <@ parseSuccess tokens "foo=bar wom=bat" = [("foo", Some "bar"); ("wom", Some "bat")] @>
 
     [<Test>]
-    member this.``Should fail on empty key``() = 
-        test <@ parseFailure keyValue "=bar" = true @>
+    member this.``Should parse a keys and key/value tokens combined``() = 
+        test <@ parseSuccess tokens "foo=bar baz wom=bat" = [("foo", Some "bar"); ("baz", None); ("wom", Some "bat")] @>
+
+[<TestFixture>]
+type Line() = 
+
+    [<Test>]
+    member this.``Should parse multiple tokens``() = 
+        test <@ parseSuccess line "foo=bar baz\n" = [("foo", Some "bar"); ("baz", None)] @>
+
+    [<Test>]
+    member this.``Should fail when no newline is provided``() = 
+        test <@ parseFailure line "foo=bar baz" = true @>
