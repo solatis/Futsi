@@ -44,4 +44,4 @@ install:
 
 script:
  - xbuild
- - mono NUnit.Runners.2.6.4/tools/nunit-console.exe Futsi.Tests/bin/Debug/Futsi.Tests.dll
+ - mono NUnit.Runners.2.6.4/tools/nunit-console.exe -labels Futsi.Tests/bin/Debug/Futsi.Tests.dll
