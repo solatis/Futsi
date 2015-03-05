@@ -6,6 +6,7 @@ open System.IO
 open FParsec.CharParsers
 open Parser
 open Ast
+open Types
 
 module Protocol = 
 
@@ -26,7 +27,7 @@ module Protocol =
 
     // Connects to host and executes within a callback. Closes connection
     // once execution completes.
-    let connect host port callback : 'a = 
+    let connect (HostName host) (Port port) callback : 'a = 
         use client = new TcpClient (host, port)
         use stream = client.GetStream()
         use reader = new StreamReader(stream)
