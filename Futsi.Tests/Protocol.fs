@@ -27,3 +27,7 @@ type Version() =
     [<Test>]
     member this.``Should negotiate protocol version 3,0 when we put a constraint in place``() =
         test <@ connect "127.0.0.1" 7656 (versionWithConstraint([3;0],[3;0])) = [3;0] @>
+
+    [<Test>]
+    member this.``Should throw an exception if we request a non-existant protocol``() =
+        raises<NoVersionException> <@ connect "127.0.0.1" 7656 (versionWithConstraint([9;0],[9;0])) = [3;0] @>

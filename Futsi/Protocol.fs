@@ -7,9 +7,10 @@ open FParsec.CharParsers
 open Parser
 open Ast
 
-exception ProtocolException of string
-
 module Protocol = 
+
+    exception ProtocolException of string
+    exception NoVersionException
 
     // The first two commands of a response should always be in a specific
     // order, and the rest of the response contains the actual data we are
@@ -60,8 +61,9 @@ module Protocol =
         let res = expectResponse ("HELLO", "VERSION") reader 
 
         match value "RESULT" res with
-        | Some("OK") -> stringToVersion (value "VERSION" res |> Option.get)
-        | _          -> raise(ProtocolException("Unrecognized result: " + res.ToString()))
+        | Some("OK")        -> stringToVersion (value "VERSION" res |> Option.get)
+        | Some("NOVERSION") -> raise(NoVersionException)
+        | _                 -> raise(ProtocolException("Unrecognized result: " + res.ToString()))
 
     // Default implementation of version negotiation, defaults to version 3.1
     let version : (StreamReader -> StreamWriter -> int list) = 
