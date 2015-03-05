@@ -47,9 +47,8 @@ module Protocol =
                  "MAX=" + versionToString max]
 
         // Converts a string "3.1" to an int array [3;1]
-        let stringToVersion = 
-            function | (Some (version : string)) -> List.map int (Array.toList (version.Split [|'.'|]))
-                     | None                      -> raise(ProtocolException("No version provided"))
+        let stringToVersion (version : string) : int list = 
+            List.map int (Array.toList (version.Split [|'.'|]))           
 
         System.Diagnostics.Debug.WriteLine ("Writing hello string: " + helloString)
 
@@ -61,7 +60,7 @@ module Protocol =
         let res = expectResponse ("HELLO", "VERSION") reader 
 
         match value "RESULT" res with
-        | Some("OK") -> stringToVersion (value "VERSION" res)
+        | Some("OK") -> stringToVersion (value "VERSION" res |> Option.get)
         | _          -> raise(ProtocolException("Unrecognized result: " + res.ToString()))
 
     // Default implementation of version negotiation, defaults to version 3.1
