@@ -67,6 +67,7 @@
     <None Include="packages.config" />
     <Compile Include="Ast.fs" />
     <Compile Include="Parser.fs" />
+    <Compile Include="Protocol.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Futsi\Futsi.fsproj">

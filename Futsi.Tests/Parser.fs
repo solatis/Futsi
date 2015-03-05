@@ -142,8 +142,8 @@ type Line() =
 
     [<Test>]
     member this.``Should parse multiple tokens``() = 
-        test <@ parseSuccess line "foo=bar baz\n" = [("foo", Some "bar"); ("baz", None)] @>
+        test <@ parseSuccess line "foo=bar baz" = [("foo", Some "bar"); ("baz", None)] @>
 
     [<Test>]
-    member this.``Should fail when no newline is provided``() = 
-        test <@ parseFailure line "foo=bar baz" = true @>
+    member this.``Should fail when newline is provided``() = 
+        test <@ parseFailure line "foo=bar baz\n" = true @>

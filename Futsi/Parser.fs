@@ -1,7 +1,12 @@
 ﻿namespace Futsi
 
 open FParsec
+open FParsec.CharParsers
+open System.IO
+
 open Ast
+
+exception ParseException of string
 
 module Parser =
 
@@ -50,5 +55,16 @@ module Parser =
         <?> "tokens"
 
     let line : Parser<Token list,unit> =
-        (tokens .>> newline)
+        (tokens .>> eof)
         <?> "line"
+
+    // Runs the parser and returns result if parse is succesful, otherwise
+    // raises a ParseException.
+    let runStream (p: Parser<Token list,unit>) (reader: StreamReader) : Token list = 
+        let buf = reader.ReadLine()
+
+        System.Diagnostics.Debug.WriteLine ("Got response: " + buf)
+
+        match run p buf with
+            | Success(result,_,_)   -> result
+            | Failure(errorMsg,_,_) -> raise (ParseException errorMsg)
