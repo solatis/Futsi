@@ -16,20 +16,23 @@ module Protocol =
     exception DuplicatedDestinationException
     exception InvalidKeyException
 
-    // The first two commands of a response should always be in a specific
-    // order, and the rest of the response contains the actual data we are
-    // looking for.
-    //
-    // This function parses the two first commands/keywords, and returns
-    // the remainders of the tokens.
+    /// <summary>
+    ///   This function parses the two first commands/keywords.
+    /// </summary>
+    /// <remarks>
+    ///   The first two commands of a response should always be in a specific
+    ///   order, and the rest of the response contains the actual data we are
+    ///   looking for.
+    /// </remarks>
+    /// <returns>Remaining tokens</returns>
     let expectResponse (k1 : string, k2 : string) (reader: StreamReader) : Token list = 
         let tokens = runStream Parser.line reader
         match tokens with
         | (k1, None) :: (k2, None) :: xs -> xs
         | _                              -> raise (ProtocolException ("Invalid response: " + tokens.ToString()))
 
-    // Connects to host and executes within a callback. Closes connection
-    // once execution completes.
+    /// Connects to host and executes within a callback. Closes connection
+    /// once execution completes.
     let connect (HostName host) (Port port) callback : 'a = 
         use client = new TcpClient (host, port)
         use stream = client.GetStream()
@@ -44,20 +47,21 @@ module Protocol =
 
         callback reader writer
 
-    // Negotiates a specific protocol version with the SAM host bridge
+    /// <summary>Negotiates a specific protocol version with the SAM host bridge</summary>
+    /// <returns>Integer representation of negotiated version as list. [3;1] means version 3.1</returns>
     let versionWithConstraint (min,max) (reader: StreamReader) (writer : StreamWriter) : int list =
-        // Converts an int array [3;1] to the string "3.1"
+        /// Converts an int array [3;1] to the string "3.1"
         let versionToString version =
             String.concat "." (List.map string version)
 
-        // Generates the string to announce ourselves with the SAM bridge
+        /// Generates the string to announce ourselves with the SAM bridge
         let helloString : string = 
             List.reduce (+) 
                 ["HELLO VERSION ";
                  "MIN=" + versionToString min + " ";
                  "MAX=" + versionToString max]
 
-        // Converts a string "3.1" to an int array [3;1]
+        /// Converts a string "3.1" to an int array [3;1]
         let stringToVersion (version : string) : int list = 
             List.map int (Array.toList (version.Split [|'.'|]))           
 
@@ -74,28 +78,35 @@ module Protocol =
         | Some("NOVERSION") -> raise(NoVersionException)
         | _                 -> raise(ProtocolException("Unrecognized result: " + res.ToString()))
 
-    // Default implementation of version negotiation, defaults to version 3.1
+    /// Default implementation of version negotiation which defaults to version 3.1
     let version : (StreamReader -> StreamWriter -> int list) = 
         versionWithConstraint ([3;1],[3;1])
 
-    // Creates a new session, optionally with a specific session id and destination. Returns
-    // session id and destination created.
-    //
-    // This session id can then be used in a separate connection to the SAM bridge to either 
-    // accept a new connection, or connect to a remote destination. 
-    //
-    // As soon as the 'master' connection with the SAM bridge is lost, the session and its 
-    // associated destination will be cleaned up.
+    /// <summary>Creates a new session</summary>
+    /// <remarks>
+    ///   Allows the user to optionally provide a specific session id and destination. 
+    ///
+    ///   This session id can then be used in a separate connection to the SAM bridge to either 
+    ///   accept a new connection, or connect to a remote destination. 
+    ///
+    ///   As soon as the 'master' connection with the SAM bridge is lost, the session and its 
+    ///   associated destination will be cleaned up.
+    /// </remarks>
+    /// <returns>Session id and destination created.</returns>
     let createSessionWith sessionId destination signatureType socketType (reader: StreamReader) (writer : StreamWriter) =
-        // Converts socket type to a string representation as used within the protocol.
+
+        /// Converts socket type to a string representation as used within the SAMv3 protocol.
         let socketTypeToString = function
             | SocketType.VirtualStream     -> "STREAM"
             | SocketType.DatagramRepliable -> "DATAGRAM"
             | SocketType.DatagramAnonymous -> "RAW"
 
-        // Converts a Destination to a string as used in the protocol. When no destination was
-        // provided, a user can optionally provide a signature type, in which case that encryption
-        // algorithm will be used.
+        /// <summary>Converts a Destination to a string as used in the protocol.</summary>
+        /// <remarks>
+        ///   When no destination is provided, a user can optionally provide a signature type, 
+        ///   in which case that encryption algorithm will be used.
+        /// </remarks>
+        /// <returns>SAMv3 string protocol for creating destination</returns>
         let destinationToString = function 
             | Some(Destination(d)), _                      -> d
             | None, None                                   -> "TRANSIENT"
@@ -111,14 +122,14 @@ module Protocol =
 
             | None, Some(SignatureType.EdDsaSha512Ed25519) -> "TRANSIENT SIGNATURE_TYPE=EdDSA_SHA512_Ed25519"
 
-        // Variable that holds the session id in a string representation. If no SessionId
-        // was provided, generates a new one based on a GUID
+        /// Variable that holds the session id in a string representation. If no SessionId
+        /// was provided, generates a new one based on a GUID
         let sessionIdAsString : string = 
             match sessionId with
             | None                -> System.Guid.NewGuid().ToString()
             | Some(SessionId(id)) -> id
 
-        // The SAMv3 protocol representation on how to create a session.
+        /// The SAMv3 protocol representation on how to create a session.
         let createSessionString : string = 
             List.reduce (+) 
                 ["SESSION CREATE STYLE=" + socketTypeToString socketType + " ";
