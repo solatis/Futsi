@@ -33,3 +33,17 @@ type Version() =
     [<Test>]
     member this.``Should throw an exception if we request a non-existant protocol``() =
         raises<NoVersionException> <@ connect (HostName "127.0.0.1") (Port 7656) (versionWithConstraint([9;0],[9;0])) = [3;0] @>
+
+[<TestFixture>]
+type CreateSession() = 
+
+    [<Test>]
+    member this.``Should be able to create sessions with all socket types``() =
+        let phase1 socketType reader writer =             
+            version reader writer |> ignore
+            createSessionWith None None None socketType reader writer
+
+        let performTest (socketType : SocketType) = 
+            connect (HostName "127.0.0.1") (Port 7656) (phase1 socketType) |> ignore
+
+        test <@ List.map performTest [SocketType.VirtualStream; SocketType.DatagramAnonymous; SocketType.DatagramRepliable] |> ignore = () @>

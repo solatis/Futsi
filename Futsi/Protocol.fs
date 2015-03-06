@@ -104,7 +104,7 @@ module Protocol =
             List.reduce (+) 
                 ["SESSION CREATE STYLE=" + socketTypeToString socketType + " ";
                  "ID=" + sessionIdToString + " ";
-                 "DESTINATION=" + (destinationToString(destination signatureType))]
+                 "DESTINATION=" + (destinationToString(destination, signatureType))]
 
         System.Diagnostics.Debug.WriteLine ("Writing create session string: " + createSessionString)
 
