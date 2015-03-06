@@ -46,4 +46,24 @@ type CreateSession() =
         let performTest (socketType : SocketType) = 
             connect (HostName "127.0.0.1") (Port 7656) (phase1 socketType) |> ignore
 
-        test <@ List.map performTest [SocketType.VirtualStream; SocketType.DatagramAnonymous; SocketType.DatagramRepliable] |> ignore = () @>
+        test <@ List.map performTest [SocketType.VirtualStream; 
+                                      SocketType.DatagramAnonymous; 
+                                      SocketType.DatagramRepliable] |> ignore = () @>
+
+    [<Test>]
+    member this.``Should be able to create sessions with all signature types``() =
+        let phase1 signatureType reader writer =             
+            version reader writer |> ignore
+            createSessionWith None None (Some signatureType) SocketType.VirtualStream reader writer
+
+        let performTest (signatureType : SignatureType) = 
+            connect (HostName "127.0.0.1") (Port 7656) (phase1 signatureType) |> ignore
+
+        test <@ List.map performTest [SignatureType.DsaSha1;
+                                      SignatureType.EcdsaSha256P256;
+                                      SignatureType.EcdsaSha384P384;
+                                      SignatureType.EcdsaSha512P521;
+                                      SignatureType.RsaSha2562048;
+                                      SignatureType.RsaSha3843072;
+                                      SignatureType.RsaSha5124096;
+                                      SignatureType.EdDsaSha512Ed25519] |> ignore = () @>
