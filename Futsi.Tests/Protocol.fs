@@ -110,3 +110,34 @@ type CreateSession() =
             createSessionWith None (Some (Destination "invalid123")) None SocketType.VirtualStream reader writer |> ignore
 
         raises<InvalidKeyException> <@ connect (HostName "127.0.0.1") (Port 7656) phase1 @>
+
+[<TestFixture>]
+type ConnectStream() = 
+
+    [<Test>]
+    member this.``Should throw an error when providing an invalid session``() =
+        let phase1 reader writer : unit = 
+            version reader writer |> ignore
+            connectStream (SessionId "invalidSessionId") (Destination "notRelevant") reader writer |> ignore
+
+        raises<InvalidIdException> <@ connect (HostName "127.0.0.1") (Port 7656) phase1 @>
+
+    [<Test>]
+    member this.``Should throw an error when not using a VirtualStream``() =
+        
+        let phase2 sessionId reader writer = 
+            version reader writer |> ignore
+            connectStream sessionId (Destination "notRelevant") reader writer |> ignore
+
+        let phase1 socketType reader writer = 
+            version reader writer |> ignore
+            let (sessionId, _) = createSessionWith None None None socketType reader writer
+
+            connect (HostName "127.0.0.1") (Port 7656) (phase2 sessionId) |> ignore
+
+        let performTest socketType =
+            connect (HostName "127.0.0.1") (Port 7656) (phase1 socketType) |> ignore
+
+        raises<ProtocolException> <@ performTest SocketType.DatagramAnonymous @>
+        raises<ProtocolException> <@ performTest SocketType.DatagramRepliable @>
+

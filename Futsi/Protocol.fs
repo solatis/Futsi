@@ -15,6 +15,9 @@ module Protocol =
     exception DuplicatedSessionIdException
     exception DuplicatedDestinationException
     exception InvalidKeyException
+    exception InvalidIdException
+    exception TimeoutException
+    exception UnreachableException
 
     /// <summary>
     ///   This function parses the two first commands/keywords.
@@ -149,3 +152,28 @@ module Protocol =
         | (Some("DUPLICATED_DEST"), _) -> raise(DuplicatedDestinationException)
         | (Some("INVALID_KEY"), _)     -> raise(InvalidKeyException)
         | _                            -> raise(ProtocolException("Unrecognized result: " + res.ToString()))
+
+    /// <summary>Establishes connection with remote destination using VirtualStream.</summary>
+    let connectStream (SessionId sessionId) (Destination destination) (reader: StreamReader) (writer: StreamWriter) = 
+        let connectStreamString : string = 
+            List.reduce (+) 
+                [ "STREAM CONNECT ";
+                  "ID=" + sessionId + " ";
+                  "DESTINATION=" + destination + " ";
+                  "SILENT=FALSE"]
+
+        System.Diagnostics.Debug.WriteLine ("Writing connect stream string: " + connectStreamString)
+
+        writer.WriteLine connectStreamString
+
+        System.Diagnostics.Debug.WriteLine ("Written line")
+
+        let res = expectResponse ("STREAM", "STATUS") reader 
+        match value "RESULT" res with
+        | Some("OK")              -> ()
+        | Some("INVALID_ID")      -> raise(InvalidIdException)
+        | Some("INVALID_KEY")     -> raise(InvalidKeyException)
+        | Some("TIMEOUT")         -> raise(TimeoutException)
+        | Some("CANT_REACH_PEER") -> raise(UnreachableException)
+        | _                       -> raise(ProtocolException("Unrecognized result: " + res.ToString()))
+                
