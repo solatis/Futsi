@@ -89,3 +89,16 @@ type CreateSession() =
             connect (HostName "127.0.0.1") (Port 7656)  (phase2 sessionId) |> ignore
 
         raises<DuplicatedSessionIdException> <@ connect (HostName "127.0.0.1") (Port 7656) phase1 @>
+
+    [<Test>]
+    member this.``Should throw an error when reusing the same destination``() =
+        let phase2 destination reader writer = 
+            version reader writer |> ignore
+            createSessionWith None (Some destination) None SocketType.VirtualStream reader writer
+
+        let phase1 reader writer : unit = 
+            version reader writer |> ignore
+            let (_, destination) = createSessionWith None None None SocketType.VirtualStream reader writer
+            connect (HostName "127.0.0.1") (Port 7656)  (phase2 destination) |> ignore
+
+        raises<DuplicatedDestinationException> <@ connect (HostName "127.0.0.1") (Port 7656) phase1 @>
