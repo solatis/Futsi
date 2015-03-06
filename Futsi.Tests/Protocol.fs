@@ -67,3 +67,25 @@ type CreateSession() =
                                       SignatureType.RsaSha3843072;
                                       SignatureType.RsaSha5124096;
                                       SignatureType.EdDsaSha512Ed25519] |> ignore = () @>
+
+    [<Test>]
+    member this.``Should throw a protocol error when creating a session twice``() =
+        let performTest reader writer = 
+            version reader writer |> ignore
+            createSessionWith None None None SocketType.VirtualStream reader writer |> ignore
+            createSessionWith None None None SocketType.VirtualStream reader writer |> ignore
+
+        raises<ProtocolException> <@ connect (HostName "127.0.0.1") (Port 7656) performTest @>
+
+    [<Test>]
+    member this.``Should throw an error when using the same session id in two sessions``() =
+        let phase2 sessionId reader writer = 
+            version reader writer |> ignore
+            createSessionWith (Some sessionId) None None SocketType.VirtualStream reader writer
+
+        let phase1 reader writer : unit = 
+            version reader writer |> ignore
+            let (sessionId, _) = createSessionWith None None None SocketType.VirtualStream reader writer
+            connect (HostName "127.0.0.1") (Port 7656)  (phase2 sessionId) |> ignore
+
+        raises<DuplicatedSessionIdException> <@ connect (HostName "127.0.0.1") (Port 7656) phase1 @>

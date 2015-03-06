@@ -79,7 +79,7 @@ module Protocol =
         versionWithConstraint ([3;1],[3;1])
 
     // Creates a new session
-    let createSessionWith sessionId destination signatureType socketType (reader: StreamReader) (writer : StreamWriter) =         
+    let createSessionWith sessionId destination signatureType socketType (reader: StreamReader) (writer : StreamWriter) =
         let sessionIdToString : string = 
             match sessionId with
             | None                -> System.Guid.NewGuid().ToString()
