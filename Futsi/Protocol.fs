@@ -44,7 +44,7 @@ module Protocol =
 
         callback reader writer
 
-    // Negotiates a specific protocol version with the remote
+    // Negotiates a specific protocol version with the SAM host bridge
     let versionWithConstraint (min,max) (reader: StreamReader) (writer : StreamWriter) : int list =
         // Converts an int array [3;1] to the string "3.1"
         let versionToString version =
@@ -78,18 +78,24 @@ module Protocol =
     let version : (StreamReader -> StreamWriter -> int list) = 
         versionWithConstraint ([3;1],[3;1])
 
-    // Creates a new session
+    // Creates a new session, optionally with a specific session id and destination. Returns
+    // session id and destination created.
+    //
+    // This session id can then be used in a separate connection to the SAM bridge to either 
+    // accept a new connection, or connect to a remote destination. 
+    //
+    // As soon as the 'master' connection with the SAM bridge is lost, the session and its 
+    // associated destination will be cleaned up.
     let createSessionWith sessionId destination signatureType socketType (reader: StreamReader) (writer : StreamWriter) =
-        let sessionIdToString : string = 
-            match sessionId with
-            | None                -> System.Guid.NewGuid().ToString()
-            | Some(SessionId(id)) -> id
-
+        // Converts socket type to a string representation as used within the protocol.
         let socketTypeToString = function
             | SocketType.VirtualStream     -> "STREAM"
             | SocketType.DatagramRepliable -> "DATAGRAM"
             | SocketType.DatagramAnonymous -> "RAW"
 
+        // Converts a Destination to a string as used in the protocol. When no destination was
+        // provided, a user can optionally provide a signature type, in which case that encryption
+        // algorithm will be used.
         let destinationToString = function 
             | Some(Destination(d)), _                      -> d
             | None, None                                   -> "TRANSIENT"
@@ -105,10 +111,18 @@ module Protocol =
 
             | None, Some(SignatureType.EdDsaSha512Ed25519) -> "TRANSIENT SIGNATURE_TYPE=EdDSA_SHA512_Ed25519"
 
+        // Variable that holds the session id in a string representation. If no SessionId
+        // was provided, generates a new one based on a GUID
+        let sessionIdAsString : string = 
+            match sessionId with
+            | None                -> System.Guid.NewGuid().ToString()
+            | Some(SessionId(id)) -> id
+
+        // The SAMv3 protocol representation on how to create a session.
         let createSessionString : string = 
             List.reduce (+) 
                 ["SESSION CREATE STYLE=" + socketTypeToString socketType + " ";
-                 "ID=" + sessionIdToString + " ";
+                 "ID=" + sessionIdAsString + " ";
                  "DESTINATION=" + (destinationToString(destination, signatureType))]
 
         System.Diagnostics.Debug.WriteLine ("Writing create session string: " + createSessionString)
@@ -119,7 +133,7 @@ module Protocol =
 
         let res = expectResponse ("SESSION", "STATUS") reader 
         match (value "RESULT" res, value "DESTINATION" res) with
-        | (Some("OK"), Some(d))        -> (SessionId sessionIdToString, Destination d)
+        | (Some("OK"), Some(d))        -> (SessionId sessionIdAsString, Destination d)
         | (Some("DUPLICATED_ID"), _)   -> raise(DuplicatedSessionIdException)
         | (Some("DUPLICATED_DEST"), _) -> raise(DuplicatedDestinationException)
         | (Some("INVALID_KEY"), _)     -> raise(InvalidKeyException)
