@@ -33,8 +33,14 @@ module Protocol =
     let connect (HostName host) (Port port) callback : 'a = 
         use client = new TcpClient (host, port)
         use stream = client.GetStream()
+
+        // We use a StreamReader, which has convenient methods such as ReadLine
         use reader = new StreamReader(stream)
-        use writer = new StreamWriter(stream)
+
+        // And we use a StreamWriter, which has convenient methods such as WriteLine. We ensure
+        // that the socket is flushed after each .Write() call to prevent programmer errors.
+        use mutable writer = new StreamWriter(stream)
+        writer.AutoFlush <- true
 
         callback reader writer
 
@@ -58,7 +64,6 @@ module Protocol =
         System.Diagnostics.Debug.WriteLine ("Writing hello string: " + helloString)
 
         writer.WriteLine helloString
-        writer.Flush()
 
         System.Diagnostics.Debug.WriteLine ("Written line")
 
@@ -109,7 +114,6 @@ module Protocol =
         System.Diagnostics.Debug.WriteLine ("Writing create session string: " + createSessionString)
 
         writer.WriteLine createSessionString
-        writer.Flush()
 
         System.Diagnostics.Debug.WriteLine ("Written line")
 
