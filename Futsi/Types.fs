@@ -17,6 +17,9 @@ module Types =
     // A Destination is represented by a Base64 encoding
     type 'a Destination = Destination of string
 
+    // A SessionId in our case is a UUID
+    type 'a SessionId   = SessionId of string
+
     // Supported signature types by I2P, as defined at
     // <https://geti2p.net/en/docs/spec/common-structures#type_Signature I2P Common Structure Documentation>
     type SignatureType =
