@@ -102,3 +102,11 @@ type CreateSession() =
             connect (HostName "127.0.0.1") (Port 7656)  (phase2 destination) |> ignore
 
         raises<DuplicatedDestinationException> <@ connect (HostName "127.0.0.1") (Port 7656) phase1 @>
+
+    [<Test>]
+    member this.``Should throw an error when providing an invalid destination``() =
+        let phase1 reader writer : unit = 
+            version reader writer |> ignore
+            createSessionWith None (Some (Destination "invalid123")) None SocketType.VirtualStream reader writer |> ignore
+
+        raises<InvalidKeyException> <@ connect (HostName "127.0.0.1") (Port 7656) phase1 @>
