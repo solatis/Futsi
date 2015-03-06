@@ -160,7 +160,7 @@ module Protocol =
                 [ "STREAM CONNECT ";
                   "ID=" + sessionId + " ";
                   "DESTINATION=" + destination + " ";
-                  "SILENT=FALSE"]
+                  "SILENT=false"]
 
         System.Diagnostics.Debug.WriteLine ("Writing connect stream string: " + connectStreamString)
 
